@@ -28,7 +28,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="ko" className={cn("dark font-sans", sans.variable, serif.variable)}>
+    <html lang="ko" className={cn("font-sans", sans.variable, serif.variable)}>
       <body className="antialiased min-h-screen bg-background">
         <TooltipProvider>
           <AppShell>{children}</AppShell>

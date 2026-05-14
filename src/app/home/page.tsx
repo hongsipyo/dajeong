@@ -16,6 +16,8 @@ import {
   Clapperboard,
   Quote,
   ArrowRight,
+  Heart,
+  Sun,
 } from "lucide-react";
 import {
   getDailyFragment,
@@ -26,6 +28,14 @@ import {
   getTotalCharacters,
   EPISODES,
 } from "@/lib/data";
+
+const ENCOURAGEMENTS = [
+  "오늘도 한 줄이면 충분해",
+  "쓰는 것만으로 이미 대단해",
+  "천천히, 네 속도로",
+  "다정아, 오늘도 와줬구나",
+  "한 문장이 한 세계를 만들어",
+];
 
 export default function HomePage() {
   const [mounted, setMounted] = useState(false);
@@ -41,44 +51,57 @@ export default function HomePage() {
   const dailyMission = getDailyMission();
   const dailyFragment = getDailyFragment();
 
+  // Stable daily encouragement
+  const today = new Date();
+  const dayIdx =
+    (today.getFullYear() * 366 + today.getMonth() * 31 + today.getDate()) %
+    ENCOURAGEMENTS.length;
+  const encouragement = ENCOURAGEMENTS[dayIdx];
+
   return (
     <div className="max-w-5xl mx-auto px-6 py-12 md:py-20 space-y-16">
       {/* ── Cover Section ── */}
       <section className="text-center space-y-6">
         <div className="relative inline-block">
-          <div className="w-44 h-60 mx-auto rounded-lg overflow-hidden shadow-[0_0_80px_rgba(200,160,50,0.08)] border border-primary/20">
-            {/* CSS-only cinematic book cover */}
-            <div className="w-full h-full relative bg-gradient-to-br from-amber-950 via-stone-950 to-neutral-950">
-              {/* Warm glow */}
-              <div className="absolute inset-0 bg-gradient-to-t from-amber-500/10 via-transparent to-amber-400/5" />
-              {/* Texture lines */}
-              <div className="absolute top-6 left-4 right-4 h-px bg-amber-500/20" />
-              <div className="absolute bottom-6 left-4 right-4 h-px bg-amber-500/20" />
+          <div className="w-44 h-60 mx-auto rounded-xl overflow-hidden shadow-lg shadow-rose-200/40 border border-rose-200/60">
+            {/* Warm light book cover */}
+            <div className="w-full h-full relative bg-gradient-to-br from-amber-50 via-rose-50 to-yellow-50">
+              {/* Soft warm glow */}
+              <div className="absolute inset-0 bg-gradient-to-t from-amber-200/30 via-transparent to-rose-100/20" />
+              {/* Decorative lines */}
+              <div className="absolute top-6 left-4 right-4 h-px bg-rose-300/40" />
+              <div className="absolute bottom-6 left-4 right-4 h-px bg-rose-300/40" />
               {/* Title */}
               <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
-                <span className="font-serif text-5xl font-bold tracking-tight bg-gradient-to-b from-amber-200 to-amber-500 bg-clip-text text-transparent">
+                <span className="font-serif text-5xl font-bold tracking-tight bg-gradient-to-b from-rose-400 to-amber-500 bg-clip-text text-transparent">
                   다정
                 </span>
-                <span className="text-[9px] tracking-[0.3em] text-amber-500/50 uppercase">
+                <span className="text-[9px] tracking-[0.3em] text-rose-400/70 uppercase">
                   a novel &middot; screenplay
                 </span>
-                <span className="text-[8px] tracking-[0.15em] text-amber-500/30 mt-4">
+                <span className="text-[10px] tracking-[0.2em] text-amber-600/70 mt-4 font-medium">
                   홍시표
                 </span>
               </div>
               {/* Spine shadow */}
-              <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-black/40 to-transparent" />
+              <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-amber-200/30 to-transparent" />
             </div>
           </div>
-          <div className="absolute -inset-6 bg-gradient-to-b from-transparent via-amber-500/5 to-transparent rounded-2xl -z-10 blur-2xl" />
+          <div className="absolute -inset-8 bg-gradient-to-b from-rose-100/40 via-amber-100/30 to-transparent rounded-3xl -z-10 blur-2xl" />
         </div>
         <div className="space-y-2">
-          <h1 className="font-serif text-4xl md:text-5xl font-bold tracking-tight">
+          <h1 className="font-serif text-4xl md:text-5xl font-bold tracking-tight text-rose-900">
             다정
           </h1>
-          <p className="text-muted-foreground text-lg md:text-xl max-w-md mx-auto leading-relaxed">
+          <p className="text-amber-800/70 text-lg md:text-xl max-w-md mx-auto leading-relaxed">
             내 젊음을 농축한 16부작 드라마 &middot; 소설
           </p>
+          {mounted && (
+            <p className="text-sm text-rose-400/80 flex items-center justify-center gap-1.5 pt-1">
+              <Sun className="w-3.5 h-3.5" />
+              {encouragement}
+            </p>
+          )}
         </div>
       </section>
 
@@ -89,36 +112,44 @@ export default function HomePage() {
             icon: BarChart3,
             label: "전체 진행률",
             value: `${overallProgress}%`,
-            color: "text-blue-400",
+            bg: "bg-blue-50",
+            color: "text-blue-500",
+            border: "border-blue-100",
           },
           {
             icon: Layers,
             label: "채워진 회차",
             value: `${filledEpisodes}/16`,
-            color: "text-emerald-400",
+            bg: "bg-emerald-50",
+            color: "text-emerald-500",
+            border: "border-emerald-100",
           },
           {
             icon: Sparkles,
             label: "파편",
             value: `${totalFragments}개`,
-            color: "text-amber-400",
+            bg: "bg-amber-50",
+            color: "text-amber-500",
+            border: "border-amber-100",
           },
           {
             icon: Users,
             label: "인물",
             value: `${totalCharacters}명`,
-            color: "text-rose-400",
+            bg: "bg-rose-50",
+            color: "text-rose-500",
+            border: "border-rose-100",
           },
         ].map((stat) => (
           <Card
             key={stat.label}
-            className="bg-card/60 border-border/60 backdrop-blur-sm"
+            className={`${stat.bg} ${stat.border} border shadow-sm`}
           >
             <CardContent className="p-4 flex items-center gap-3">
               <stat.icon className={`w-5 h-5 ${stat.color} shrink-0`} />
               <div>
-                <p className="text-xs text-muted-foreground">{stat.label}</p>
-                <p className="text-lg font-semibold tracking-tight">
+                <p className="text-xs text-gray-500">{stat.label}</p>
+                <p className="text-lg font-semibold tracking-tight text-gray-800">
                   {stat.value}
                 </p>
               </div>
@@ -129,9 +160,14 @@ export default function HomePage() {
 
       {/* ── 16부작 진행률 Grid ── */}
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
-          16부작 진행률
-        </h2>
+        <div className="flex items-center justify-between">
+          <h2 className="text-sm font-medium text-amber-700/80 uppercase tracking-wider">
+            16부작 진행률
+          </h2>
+          <span className="text-xs text-rose-400/70">
+            {filledEpisodes}개 시작됨 -- 잘 하고 있어!
+          </span>
+        </div>
         <div className="grid grid-cols-4 gap-3">
           {EPISODES.map((ep) => {
             const isFilled =
@@ -143,17 +179,15 @@ export default function HomePage() {
                 key={ep.number}
                 className={`relative overflow-hidden transition-all duration-300 ${
                   isFilled
-                    ? "bg-card/80 border-primary/20 shadow-[0_0_20px_rgba(255,255,255,0.02)]"
-                    : "bg-transparent border-dashed border-border/50"
+                    ? "bg-white border-rose-200/60 shadow-md shadow-rose-100/50"
+                    : "bg-amber-50/50 border-dashed border-amber-200/60"
                 }`}
               >
                 <CardContent className="p-3 space-y-2">
                   <div className="flex items-baseline justify-between">
                     <span
                       className={`text-xs font-medium ${
-                        isFilled
-                          ? "text-foreground/80"
-                          : "text-muted-foreground/50"
+                        isFilled ? "text-rose-700" : "text-amber-400"
                       }`}
                     >
                       {ep.number}부
@@ -161,28 +195,25 @@ export default function HomePage() {
                     {ep.progress > 0 && (
                       <Badge
                         variant="secondary"
-                        className="text-[10px] px-1.5 py-0 bg-zinc-800 text-muted-foreground"
+                        className="text-[10px] px-1.5 py-0 bg-amber-100 text-amber-700 border-0"
                       >
                         {ep.progress}%
                       </Badge>
                     )}
                   </div>
                   {isFilled ? (
-                    <p className="text-xs text-muted-foreground truncate leading-relaxed">
+                    <p className="text-xs text-gray-600 truncate leading-relaxed">
                       {ep.title || ep.firstLine || "untitled"}
                     </p>
                   ) : (
-                    <p className="text-[11px] text-muted-foreground/30 italic">
+                    <p className="text-[11px] text-amber-300 italic">
                       여기 채워질 거야
                     </p>
                   )}
-                  <Progress
-                    value={ep.progress}
-                    className="h-1"
-                  />
+                  <Progress value={ep.progress} className="h-1" />
                 </CardContent>
                 {isFilled && ep.progress > 0 && (
-                  <div className="absolute inset-0 bg-gradient-to-t from-primary/[0.03] to-transparent pointer-events-none" />
+                  <div className="absolute inset-0 bg-gradient-to-t from-rose-100/20 to-transparent pointer-events-none" />
                 )}
               </Card>
             );
@@ -193,47 +224,53 @@ export default function HomePage() {
       {/* ── 오늘의 미션 + 오늘의 파편 회상 ── */}
       <section className="grid md:grid-cols-2 gap-4">
         {/* 오늘의 미션 */}
-        <Card className="bg-card/60 border-border/60">
+        <Card className="bg-gradient-to-br from-rose-50 to-amber-50 border-rose-200/50 shadow-sm">
           <CardContent className="p-6 space-y-4">
             <div className="flex items-center gap-2">
-              <Pen className="w-4 h-4 text-amber-400" />
-              <h3 className="text-sm font-medium text-muted-foreground">
+              <Pen className="w-4 h-4 text-rose-400" />
+              <h3 className="text-sm font-medium text-rose-600">
                 오늘의 미션
               </h3>
+              <Heart className="w-3 h-3 text-rose-300 ml-auto" />
             </div>
-            <p className="text-foreground/90 leading-relaxed text-sm">
+            <p className="text-gray-700 leading-relaxed text-sm">
               {mounted ? dailyMission : "\u00A0"}
             </p>
-            <Link href="/fragments">
-              <Button
-                variant="outline"
-                size="sm"
-                className="mt-2 gap-1.5 border-primary/30 hover:border-primary/60 hover:bg-primary/10"
-              >
-                도전하기
-                <ArrowRight className="w-3.5 h-3.5" />
-              </Button>
-            </Link>
+            <div className="flex items-center justify-between">
+              <Link href="/fragments">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="gap-1.5 border-rose-300/60 text-rose-600 hover:bg-rose-100/60 hover:border-rose-400/60 bg-white/60"
+                >
+                  도전하기
+                  <ArrowRight className="w-3.5 h-3.5" />
+                </Button>
+              </Link>
+              <span className="text-[11px] text-amber-500/70 italic">
+                완벽하지 않아도 돼
+              </span>
+            </div>
           </CardContent>
         </Card>
 
         {/* 오늘의 파편 회상 */}
-        <Card className="bg-card/60 border-border/60">
+        <Card className="bg-gradient-to-br from-amber-50 to-yellow-50 border-amber-200/50 shadow-sm">
           <CardContent className="p-6 space-y-4">
             <div className="flex items-center gap-2">
-              <Quote className="w-4 h-4 text-blue-400" />
-              <h3 className="text-sm font-medium text-muted-foreground">
+              <Quote className="w-4 h-4 text-amber-500" />
+              <h3 className="text-sm font-medium text-amber-700">
                 오늘의 파편 회상
               </h3>
             </div>
             <blockquote className="relative">
-              <span className="absolute -top-2 -left-1 text-3xl text-muted-foreground/30 font-serif select-none">
+              <span className="absolute -top-2 -left-1 text-3xl text-amber-300/60 font-serif select-none">
                 &ldquo;
               </span>
-              <p className="text-foreground/80 italic leading-relaxed text-sm pl-4 pr-2">
+              <p className="text-gray-700 italic leading-relaxed text-sm pl-4 pr-2">
                 {mounted ? dailyFragment.content : "\u00A0"}
               </p>
-              <span className="text-3xl text-muted-foreground/30 font-serif select-none leading-none">
+              <span className="text-3xl text-amber-300/60 font-serif select-none leading-none">
                 &rdquo;
               </span>
             </blockquote>
@@ -243,7 +280,7 @@ export default function HomePage() {
                   <Badge
                     key={tag}
                     variant="secondary"
-                    className="text-[10px] bg-secondary text-muted-foreground"
+                    className="text-[10px] bg-amber-100/80 text-amber-700 border-0"
                   >
                     {tag}
                   </Badge>
@@ -256,51 +293,69 @@ export default function HomePage() {
 
       {/* ── 소설 / 각본 트래커 ── */}
       <section className="space-y-4">
-        <h2 className="text-sm font-medium text-muted-foreground uppercase tracking-wider">
+        <h2 className="text-sm font-medium text-amber-700/80 uppercase tracking-wider">
           듀얼 트래커
         </h2>
         <div className="grid md:grid-cols-2 gap-4">
           {/* 소설 */}
-          <Card className="bg-card/60 border-border/60">
+          <Card className="bg-white border-emerald-200/50 shadow-sm">
             <CardContent className="p-5 space-y-3">
               <div className="flex items-center gap-2">
-                <BookOpen className="w-4 h-4 text-emerald-400" />
-                <h3 className="font-medium text-sm">소설</h3>
+                <BookOpen className="w-4 h-4 text-emerald-500" />
+                <h3 className="font-medium text-sm text-gray-800">소설</h3>
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-gray-500">
                 성석제 나레이션 + 매지컬 리얼리즘
               </p>
               <div className="space-y-1">
-                <div className="flex justify-between text-xs text-muted-foreground">
+                <div className="flex justify-between text-xs text-gray-500">
                   <span>초고 진행률</span>
                   <span>0%</span>
                 </div>
                 <Progress value={0} className="h-1.5" />
               </div>
+              <p className="text-[11px] text-emerald-400 italic">
+                첫 문장을 쓰는 날이 시작이야
+              </p>
             </CardContent>
           </Card>
 
           {/* 드라마 각본 */}
-          <Card className="bg-card/60 border-border/60">
+          <Card className="bg-white border-violet-200/50 shadow-sm">
             <CardContent className="p-5 space-y-3">
               <div className="flex items-center gap-2">
-                <Clapperboard className="w-4 h-4 text-violet-400" />
-                <h3 className="font-medium text-sm">드라마 각본</h3>
+                <Clapperboard className="w-4 h-4 text-violet-500" />
+                <h3 className="font-medium text-sm text-gray-800">
+                  드라마 각본
+                </h3>
               </div>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-xs text-gray-500">
                 옴니버스 16부작 &middot; 안나 카레니나 구조
               </p>
               <div className="space-y-1">
-                <div className="flex justify-between text-xs text-muted-foreground">
+                <div className="flex justify-between text-xs text-gray-500">
                   <span>각본 진행률</span>
                   <span>0%</span>
                 </div>
                 <Progress value={0} className="h-1.5" />
               </div>
+              <p className="text-[11px] text-violet-400 italic">
+                구조가 서면 장면은 따라와
+              </p>
             </CardContent>
           </Card>
         </div>
       </section>
+
+      {/* ── Footer ── */}
+      <footer className="text-center pt-4 pb-8 space-y-1">
+        <p className="text-xs text-rose-300">
+          작가 홍시표의 작업 공간
+        </p>
+        <p className="text-[11px] text-amber-300/80">
+          매일 조금씩, 다정하게
+        </p>
+      </footer>
     </div>
   );
 }
