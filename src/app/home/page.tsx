@@ -46,12 +46,28 @@ export default function HomePage() {
       {/* ── Cover Section ── */}
       <section className="text-center space-y-6">
         <div className="relative inline-block">
-          <div className="w-40 h-56 mx-auto bg-gradient-to-b from-zinc-900 to-zinc-950 rounded-lg border border-zinc-800 flex items-center justify-center shadow-[0_0_60px_rgba(255,255,255,0.04)]">
-            <span className="font-serif text-5xl font-bold tracking-tight bg-gradient-to-b from-zinc-100 to-zinc-400 bg-clip-text text-transparent">
-              다정
-            </span>
+          <div className="w-44 h-60 mx-auto rounded-lg overflow-hidden shadow-[0_0_80px_rgba(200,160,50,0.08)] border border-primary/20">
+            {/* CSS-only cinematic book cover */}
+            <div className="w-full h-full relative bg-gradient-to-br from-amber-950 via-stone-950 to-neutral-950">
+              {/* Warm glow */}
+              <div className="absolute inset-0 bg-gradient-to-t from-amber-500/10 via-transparent to-amber-400/5" />
+              {/* Texture lines */}
+              <div className="absolute top-6 left-4 right-4 h-px bg-amber-500/20" />
+              <div className="absolute bottom-6 left-4 right-4 h-px bg-amber-500/20" />
+              {/* Title */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center gap-3">
+                <span className="font-serif text-5xl font-bold tracking-tight bg-gradient-to-b from-amber-200 to-amber-500 bg-clip-text text-transparent">
+                  다정
+                </span>
+                <span className="text-[9px] tracking-[0.3em] text-amber-500/50 uppercase">
+                  a novel &middot; screenplay
+                </span>
+              </div>
+              {/* Spine shadow */}
+              <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-black/40 to-transparent" />
+            </div>
           </div>
-          <div className="absolute -inset-4 bg-gradient-to-b from-transparent via-primary/5 to-transparent rounded-2xl -z-10 blur-xl" />
+          <div className="absolute -inset-6 bg-gradient-to-b from-transparent via-amber-500/5 to-transparent rounded-2xl -z-10 blur-2xl" />
         </div>
         <div className="space-y-2">
           <h1 className="font-serif text-4xl md:text-5xl font-bold tracking-tight">
@@ -93,7 +109,7 @@ export default function HomePage() {
         ].map((stat) => (
           <Card
             key={stat.label}
-            className="bg-zinc-950/60 border-zinc-800/60 backdrop-blur-sm"
+            className="bg-card/60 border-border/60 backdrop-blur-sm"
           >
             <CardContent className="p-4 flex items-center gap-3">
               <stat.icon className={`w-5 h-5 ${stat.color} shrink-0`} />
@@ -124,8 +140,8 @@ export default function HomePage() {
                 key={ep.number}
                 className={`relative overflow-hidden transition-all duration-300 ${
                   isFilled
-                    ? "bg-zinc-950/80 border-zinc-700/60 shadow-[0_0_20px_rgba(255,255,255,0.02)]"
-                    : "bg-transparent border-dashed border-zinc-800/50"
+                    ? "bg-card/80 border-primary/20 shadow-[0_0_20px_rgba(255,255,255,0.02)]"
+                    : "bg-transparent border-dashed border-border/50"
                 }`}
               >
                 <CardContent className="p-3 space-y-2">
@@ -133,8 +149,8 @@ export default function HomePage() {
                     <span
                       className={`text-xs font-medium ${
                         isFilled
-                          ? "text-zinc-300"
-                          : "text-zinc-600"
+                          ? "text-foreground/80"
+                          : "text-muted-foreground/50"
                       }`}
                     >
                       {ep.number}부
@@ -142,18 +158,18 @@ export default function HomePage() {
                     {ep.progress > 0 && (
                       <Badge
                         variant="secondary"
-                        className="text-[10px] px-1.5 py-0 bg-zinc-800 text-zinc-400"
+                        className="text-[10px] px-1.5 py-0 bg-zinc-800 text-muted-foreground"
                       >
                         {ep.progress}%
                       </Badge>
                     )}
                   </div>
                   {isFilled ? (
-                    <p className="text-xs text-zinc-400 truncate leading-relaxed">
+                    <p className="text-xs text-muted-foreground truncate leading-relaxed">
                       {ep.title || ep.firstLine || "untitled"}
                     </p>
                   ) : (
-                    <p className="text-[11px] text-zinc-700 italic">
+                    <p className="text-[11px] text-muted-foreground/30 italic">
                       여기 채워질 거야
                     </p>
                   )}
@@ -174,7 +190,7 @@ export default function HomePage() {
       {/* ── 오늘의 미션 + 오늘의 파편 회상 ── */}
       <section className="grid md:grid-cols-2 gap-4">
         {/* 오늘의 미션 */}
-        <Card className="bg-zinc-950/60 border-zinc-800/60">
+        <Card className="bg-card/60 border-border/60">
           <CardContent className="p-6 space-y-4">
             <div className="flex items-center gap-2">
               <Pen className="w-4 h-4 text-amber-400" />
@@ -189,7 +205,7 @@ export default function HomePage() {
               <Button
                 variant="outline"
                 size="sm"
-                className="mt-2 gap-1.5 border-zinc-700 hover:border-zinc-500 hover:bg-zinc-900"
+                className="mt-2 gap-1.5 border-primary/30 hover:border-primary/60 hover:bg-primary/10"
               >
                 도전하기
                 <ArrowRight className="w-3.5 h-3.5" />
@@ -199,7 +215,7 @@ export default function HomePage() {
         </Card>
 
         {/* 오늘의 파편 회상 */}
-        <Card className="bg-zinc-950/60 border-zinc-800/60">
+        <Card className="bg-card/60 border-border/60">
           <CardContent className="p-6 space-y-4">
             <div className="flex items-center gap-2">
               <Quote className="w-4 h-4 text-blue-400" />
@@ -208,13 +224,13 @@ export default function HomePage() {
               </h3>
             </div>
             <blockquote className="relative">
-              <span className="absolute -top-2 -left-1 text-3xl text-zinc-700 font-serif select-none">
+              <span className="absolute -top-2 -left-1 text-3xl text-muted-foreground/30 font-serif select-none">
                 &ldquo;
               </span>
               <p className="text-foreground/80 italic leading-relaxed text-sm pl-4 pr-2">
                 {mounted ? dailyFragment.content : "\u00A0"}
               </p>
-              <span className="text-3xl text-zinc-700 font-serif select-none leading-none">
+              <span className="text-3xl text-muted-foreground/30 font-serif select-none leading-none">
                 &rdquo;
               </span>
             </blockquote>
@@ -224,7 +240,7 @@ export default function HomePage() {
                   <Badge
                     key={tag}
                     variant="secondary"
-                    className="text-[10px] bg-zinc-800/80 text-zinc-500"
+                    className="text-[10px] bg-secondary text-muted-foreground"
                   >
                     {tag}
                   </Badge>
@@ -242,7 +258,7 @@ export default function HomePage() {
         </h2>
         <div className="grid md:grid-cols-2 gap-4">
           {/* 소설 */}
-          <Card className="bg-zinc-950/60 border-zinc-800/60">
+          <Card className="bg-card/60 border-border/60">
             <CardContent className="p-5 space-y-3">
               <div className="flex items-center gap-2">
                 <BookOpen className="w-4 h-4 text-emerald-400" />
@@ -262,7 +278,7 @@ export default function HomePage() {
           </Card>
 
           {/* 드라마 각본 */}
-          <Card className="bg-zinc-950/60 border-zinc-800/60">
+          <Card className="bg-card/60 border-border/60">
             <CardContent className="p-5 space-y-3">
               <div className="flex items-center gap-2">
                 <Clapperboard className="w-4 h-4 text-violet-400" />
