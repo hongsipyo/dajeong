@@ -13,6 +13,7 @@ import {
   StickyNote,
   Search,
   Lightbulb,
+  TrendingUp,
   Menu,
   X,
   Pen,
@@ -26,6 +27,7 @@ const navItems = [
   { href: "/episodes", label: "회차", icon: Film, emoji: "" },
   { href: "/fragments", label: "파편", icon: Sparkles, emoji: "" },
   { href: "/brainstorm", label: "브레인스토밍", icon: Lightbulb, emoji: "" },
+  { href: "/progress", label: "프로그레스", icon: TrendingUp, emoji: "" },
   { href: "/refs", label: "레퍼런스", icon: BookOpen, emoji: "" },
   { href: "/scratch", label: "메모", icon: StickyNote, emoji: "" },
 ];

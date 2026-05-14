@@ -3,9 +3,8 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { createClient } from "@/lib/supabase/client";
-import { useRouter } from "next/navigation";
 import { Pen } from "lucide-react";
 
 export default function LoginPage() {
@@ -13,7 +12,21 @@ export default function LoginPage() {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
+  const [checking, setChecking] = useState(true);
+
+  // Check if already logged in
+  useEffect(() => {
+    async function check() {
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        window.location.href = "/home";
+      } else {
+        setChecking(false);
+      }
+    }
+    check();
+  }, []);
 
   const handleLogin = async (e?: React.FormEvent) => {
     e?.preventDefault();
@@ -37,13 +50,21 @@ export default function LoginPage() {
         return;
       }
 
-      router.push("/home");
-      router.refresh();
+      // Hard redirect to ensure cookies are sent with next request
+      window.location.href = "/home";
     } catch {
       setError("로그인 중 오류가 발생했습니다");
       setLoading(false);
     }
   };
+
+  if (checking) {
+    return (
+      <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-amber-50 via-rose-50 to-yellow-50">
+        <p className="text-muted-foreground text-sm">확인 중...</p>
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 bg-gradient-to-br from-amber-50 via-rose-50 to-yellow-50">
