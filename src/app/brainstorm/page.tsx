@@ -12,8 +12,9 @@ import {
   Sparkles,
   ArrowRight,
 } from "lucide-react";
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { CHARACTERS, EPISODES, FRAGMENTS } from "@/lib/data";
+import { createClient } from "@/lib/supabase/client";
 
 // ============================================================
 // 브레인스토밍 질문 뱅크 — 작품 맥락에 맞는 질문들
@@ -129,8 +130,30 @@ export default function BrainstormPage() {
   const [category, setCategory] = useState<Category>("character");
   const [currentQuestion, setCurrentQuestion] = useState<string | null>(null);
   const [answer, setAnswer] = useState("");
-  const [history, setHistory] = useState<{ q: string; a: string }[]>([]);
+  const [history, setHistory] = useState<{ id?: string; q: string; a: string; created_at?: string }[]>([]);
   const [suggestions] = useState(getSuggestions);
+  const [saving, setSaving] = useState(false);
+
+  // Load history from Supabase
+  useEffect(() => {
+    async function loadHistory() {
+      const supabase = createClient();
+      const { data } = await supabase
+        .from("brainstorm_history" as never)
+        .select("*")
+        .order("created_at", { ascending: false })
+        .limit(50) as { data: { id: string; question: string; answer: string; created_at: string }[] | null };
+      if (data) {
+        setHistory(data.map((d) => ({
+          id: d.id,
+          q: d.question,
+          a: d.answer,
+          created_at: d.created_at,
+        })));
+      }
+    }
+    loadHistory();
+  }, []);
 
   const pickRandom = useCallback(() => {
     const pool = QUESTIONS[category];
@@ -139,9 +162,29 @@ export default function BrainstormPage() {
     setAnswer("");
   }, [category]);
 
-  const saveAndNext = () => {
+  const saveAndNext = async () => {
     if (currentQuestion && answer.trim()) {
-      setHistory([{ q: currentQuestion, a: answer.trim() }, ...history]);
+      setSaving(true);
+      const supabase = createClient();
+      const { data: { user } } = await supabase.auth.getUser();
+
+      if (user) {
+        const { data } = await supabase
+          .from("brainstorm_history" as never)
+          .insert({
+            question: currentQuestion,
+            answer: answer.trim(),
+            category,
+            user_id: user.id,
+          } as never)
+          .select()
+          .single() as { data: { id: string; question: string; answer: string; created_at: string } | null };
+
+        if (data) {
+          setHistory([{ id: data.id, q: data.question, a: data.answer, created_at: data.created_at }, ...history]);
+        }
+      }
+      setSaving(false);
     }
     pickRandom();
   };
@@ -214,8 +257,8 @@ export default function BrainstormPage() {
                 autoFocus
               />
               <div className="flex gap-2">
-                <Button size="sm" onClick={saveAndNext} className="gap-1.5">
-                  {answer.trim() ? "저장하고 다음" : "건너뛰기"}
+                <Button size="sm" onClick={saveAndNext} disabled={saving} className="gap-1.5">
+                  {saving ? "저장 중..." : answer.trim() ? "저장하고 다음" : "건너뛰기"}
                   <ChevronRight className="w-3.5 h-3.5" />
                 </Button>
                 <Button variant="outline" size="sm" onClick={pickRandom} className="gap-1.5">
@@ -245,7 +288,7 @@ export default function BrainstormPage() {
       {history.length > 0 && (
         <section>
           <h2 className="text-xs font-medium text-muted-foreground uppercase tracking-wider mb-3">
-            오늘 나온 생각들
+            지금까지 나온 생각들
           </h2>
           <div className="space-y-3">
             {history.map((item, i) => (

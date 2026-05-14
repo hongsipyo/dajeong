@@ -205,6 +205,32 @@ export interface Database {
           created_at?: string;
         };
       };
+      brainstorm_history: {
+        Row: {
+          id: string;
+          question: string;
+          answer: string;
+          category: string | null;
+          user_id: string;
+          created_at: string;
+        };
+        Insert: {
+          id?: string;
+          question: string;
+          answer: string;
+          category?: string | null;
+          user_id: string;
+          created_at?: string;
+        };
+        Update: {
+          id?: string;
+          question?: string;
+          answer?: string;
+          category?: string | null;
+          user_id?: string;
+          created_at?: string;
+        };
+      };
       scratch: {
         Row: {
           id: string;
