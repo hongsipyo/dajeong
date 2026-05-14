@@ -151,7 +151,7 @@ export async function deleteScratch(id: string) {
 
 export async function saveBrainstorm(question: string, answer: string, category: string) {
   const supabase = createClient();
-  const { data, error } = (await supabase
+  const result = await supabase
     .from("brainstorm_history" as never)
     .insert({
       question,
@@ -160,9 +160,15 @@ export async function saveBrainstorm(question: string, answer: string, category:
       user_id: USER_ID,
     } as never)
     .select()
-    .single()) as { data: { id: string; question: string; answer: string; created_at: string } | null; error: unknown };
+    .single();
 
-  if (!error && data) {
+  if (result.error) {
+    throw new Error(result.error.message);
+  }
+
+  const data = result.data as { id: string; question: string; answer: string; created_at: string } | null;
+
+  if (data) {
     await logActivity("brainstorm", answer.slice(0, 80), "brainstorm", data.id);
   }
 
