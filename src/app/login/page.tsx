@@ -4,11 +4,35 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
+import { createClient } from "@/lib/supabase/client";
+import { useRouter } from "next/navigation";
 
 export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [mode, setMode] = useState<"password" | "magic">("password");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const router = useRouter();
+
+  const handleLogin = async () => {
+    setLoading(true);
+    setError(null);
+    const supabase = createClient();
+
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password,
+    });
+
+    if (error) {
+      setError(error.message);
+      setLoading(false);
+      return;
+    }
+
+    router.push("/home");
+    router.refresh();
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center px-6 bg-background">
@@ -28,27 +52,23 @@ export default function LoginPage() {
               onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          {mode === "password" && (
-            <div>
-              <Input
-                type="password"
-                placeholder="비밀번호"
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-              />
-            </div>
+          <div>
+            <Input
+              type="password"
+              placeholder="비밀번호"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") handleLogin();
+              }}
+            />
+          </div>
+          {error && (
+            <p className="text-xs text-destructive text-center">{error}</p>
           )}
-          <Button className="w-full">
-            {mode === "password" ? "로그인" : "매직 링크 전송"}
+          <Button className="w-full" onClick={handleLogin} disabled={loading}>
+            {loading ? "로그인 중..." : "로그인"}
           </Button>
-          <button
-            onClick={() => setMode(mode === "password" ? "magic" : "password")}
-            className="text-xs text-muted-foreground hover:text-foreground w-full text-center block"
-          >
-            {mode === "password"
-              ? "매직 링크로 로그인"
-              : "비밀번호로 로그인"}
-          </button>
         </CardContent>
       </Card>
     </div>
