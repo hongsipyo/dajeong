@@ -157,16 +157,26 @@ export default function BrainstormPage() {
     setAnswer("");
   }, [category]);
 
+  const [saveStatus, setSaveStatus] = useState<string | null>(null);
+
   const saveAndNext = async () => {
     if (currentQuestion && answer.trim()) {
       setSaving(true);
-      const data = await saveBrainstorm(currentQuestion, answer.trim(), category);
-      if (data) {
-        setHistory([{ id: data.id, q: data.question, a: data.answer, created_at: data.created_at }, ...history]);
+      setSaveStatus(null);
+      try {
+        const data = await saveBrainstorm(currentQuestion, answer.trim(), category);
+        if (data) {
+          setHistory((prev) => [{ id: data.id, q: data.question, a: data.answer, created_at: data.created_at }, ...prev]);
+          setSaveStatus("저장됨!");
+        } else {
+          setSaveStatus("저장 실패 — 데이터 없음");
+        }
+      } catch (err) {
+        setSaveStatus("저장 실패: " + String(err));
       }
       setSaving(false);
     }
-    pickRandom();
+    setTimeout(() => pickRandom(), 500);
   };
 
   return (
@@ -236,7 +246,7 @@ export default function BrainstormPage() {
                 className="min-h-[120px] text-sm"
                 autoFocus
               />
-              <div className="flex gap-2">
+              <div className="flex items-center gap-2">
                 <Button size="sm" onClick={saveAndNext} disabled={saving} className="gap-1.5">
                   {saving ? "저장 중..." : answer.trim() ? "저장하고 다음" : "건너뛰기"}
                   <ChevronRight className="w-3.5 h-3.5" />
@@ -245,6 +255,11 @@ export default function BrainstormPage() {
                   <Shuffle className="w-3.5 h-3.5" />
                   다른 질문
                 </Button>
+                {saveStatus && (
+                  <span className={`text-xs ${saveStatus.includes("실패") ? "text-destructive" : "text-emerald-600"}`}>
+                    {saveStatus}
+                  </span>
+                )}
               </div>
             </CardContent>
           </Card>
