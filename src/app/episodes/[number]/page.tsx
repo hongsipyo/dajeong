@@ -10,24 +10,31 @@ import { Badge } from "@/components/ui/badge";
 import { ArrowLeft, Plus, Save } from "lucide-react";
 import Link from "next/link";
 import { useState } from "react";
+import { useParams } from "next/navigation";
+import { EPISODES } from "@/lib/data";
 
 export default function EpisodeDetailPage() {
-  const [title, setTitle] = useState("올바른 하루");
-  const [synopsis, setSynopsis] = useState(
-    "다정이는 올바른 하루를 위한 계획을 세운다. 다른 사람들을 보고 올바른 하루를 베끼려 한다. 다정이는 사실 상품의 라벨이 전면에 보이도록 줄을 세우고 예쁘게 맞추는 것보다 훨씬 더 중요한 뭔가가 있다고 생각하는 사람이지만..."
-  );
-  const [progress, setProgress] = useState(15);
+  const params = useParams();
+  const ep = EPISODES.find((e) => e.number === Number(params.number));
 
-  const scenes = [
-    { title: "다정이 아침 — 계획 세우기", content: "다른 집 엄마는 손걸레를 미리 개놓음" },
-    { title: "공부방 — 엄마 도우미", content: "알바가 아닌 자영업 도우미의 세련되지 않은 느낌" },
-    { title: "편의점/알바 — 정리정돈 집착", content: "상품 라벨 전면, 줄 맞춤. 계속 흐트러짐" },
-  ];
+  const [title, setTitle] = useState(ep?.title ?? "");
+  const [synopsis, setSynopsis] = useState(ep?.synopsis ?? "");
+  const [progress, setProgress] = useState(ep?.progress ?? 0);
 
-  const dialogues = [
-    { speaker: "다정", line: "다들 어떻게 그렇게들 사는지." },
-    { speaker: "나레이션", line: "인생에 의미는 없지만 형태는 있다." },
-  ];
+  if (!ep) {
+    return (
+      <div className="max-w-3xl mx-auto px-6 py-10">
+        <Link
+          href="/episodes"
+          className="inline-flex items-center gap-1.5 text-sm text-muted-foreground hover:text-foreground mb-6"
+        >
+          <ArrowLeft className="w-4 h-4" />
+          회차 목록
+        </Link>
+        <p className="text-muted-foreground">회차를 찾을 수 없습니다.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="max-w-3xl mx-auto px-6 py-10">
@@ -42,7 +49,7 @@ export default function EpisodeDetailPage() {
       {/* Header */}
       <div className="flex items-center gap-4 mb-2">
         <Badge variant="secondary" className="text-lg px-3 py-1">
-          1부
+          {ep.number}부
         </Badge>
         <Input
           value={title}
@@ -51,6 +58,21 @@ export default function EpisodeDetailPage() {
           placeholder="제목을 입력하세요..."
         />
       </div>
+
+      {ep.firstLine && (
+        <p className="text-sm text-primary/70 italic mb-3 ml-1">
+          &ldquo;{ep.firstLine}&rdquo;
+        </p>
+      )}
+
+      {ep.focusCharacter && (
+        <div className="flex items-center gap-2 mb-3">
+          <span className="text-xs text-muted-foreground">중심 인물:</span>
+          <Badge variant="secondary" className="text-xs">
+            {ep.focusCharacter}
+          </Badge>
+        </div>
+      )}
 
       <div className="flex items-center gap-3 mb-8">
         <Progress value={progress} className="h-2 flex-1 max-w-xs" />
@@ -83,47 +105,48 @@ export default function EpisodeDetailPage() {
       </Card>
 
       {/* Scenes */}
-      <Card className="mb-6">
-        <CardHeader className="pb-3 flex flex-row items-center justify-between">
-          <CardTitle className="text-sm font-medium">장면</CardTitle>
-          <Button variant="ghost" size="sm" className="gap-1 text-xs">
-            <Plus className="w-3.5 h-3.5" />
-            추가
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {scenes.map((scene, i) => (
-            <div
-              key={i}
-              className="p-3 rounded-lg bg-secondary/50 border border-border/50"
-            >
-              <h4 className="text-sm font-medium mb-1">{scene.title}</h4>
-              <p className="text-xs text-muted-foreground">{scene.content}</p>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      {ep.scenes.length > 0 && (
+        <Card className="mb-6">
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <CardTitle className="text-sm font-medium">장면</CardTitle>
+            <Button variant="ghost" size="sm" className="gap-1 text-xs">
+              <Plus className="w-3.5 h-3.5" />
+              추가
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-3">
+            {ep.scenes.map((scene, i) => (
+              <div
+                key={i}
+                className="p-3 rounded-lg bg-secondary/50 border border-border/50"
+              >
+                <h4 className="text-sm font-medium mb-1">{scene.title}</h4>
+                <p className="text-xs text-muted-foreground">{scene.content}</p>
+              </div>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
-      {/* Dialogues */}
-      <Card className="mb-6">
-        <CardHeader className="pb-3 flex flex-row items-center justify-between">
-          <CardTitle className="text-sm font-medium">대사 파편</CardTitle>
-          <Button variant="ghost" size="sm" className="gap-1 text-xs">
-            <Plus className="w-3.5 h-3.5" />
-            추가
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-2.5">
-          {dialogues.map((d, i) => (
-            <div key={i} className="flex gap-3 text-sm">
-              <Badge variant="secondary" className="shrink-0 text-[10px]">
-                {d.speaker}
-              </Badge>
-              <p className="text-foreground/80 italic">&ldquo;{d.line}&rdquo;</p>
-            </div>
-          ))}
-        </CardContent>
-      </Card>
+      {/* Key Fragments */}
+      {ep.keyFragments.length > 0 && (
+        <Card className="mb-6">
+          <CardHeader className="pb-3 flex flex-row items-center justify-between">
+            <CardTitle className="text-sm font-medium">핵심 파편</CardTitle>
+            <Button variant="ghost" size="sm" className="gap-1 text-xs">
+              <Plus className="w-3.5 h-3.5" />
+              추가
+            </Button>
+          </CardHeader>
+          <CardContent className="space-y-2.5">
+            {ep.keyFragments.map((frag, i) => (
+              <p key={i} className="text-sm text-foreground/80 italic">
+                &ldquo;{frag}&rdquo;
+              </p>
+            ))}
+          </CardContent>
+        </Card>
+      )}
 
       <div className="flex justify-end">
         <Button className="gap-1.5">

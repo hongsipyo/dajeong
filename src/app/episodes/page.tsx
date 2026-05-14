@@ -4,25 +4,11 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Film } from "lucide-react";
 import Link from "next/link";
-
-const DEMO_EPISODES = Array.from({ length: 16 }, (_, i) => ({
-  id: String(i + 1),
-  number: i + 1,
-  title: null as string | null,
-  synopsis: null as string | null,
-  progress: 0,
-  focus_character: null as string | null,
-}));
-
-// 작업 중인 회차들에 데모 데이터
-DEMO_EPISODES[0].title = "올바른 하루";
-DEMO_EPISODES[0].synopsis = "다정이는 올바른 하루를 위한 계획을 세운다. 다른 사람들을 보고 올바른 하루를 베끼려 한다.";
-DEMO_EPISODES[0].progress = 15;
-DEMO_EPISODES[0].focus_character = "다정";
+import { EPISODES } from "@/lib/data";
 
 export default function EpisodesPage() {
   const totalProgress = Math.round(
-    DEMO_EPISODES.reduce((sum, ep) => sum + ep.progress, 0) / 16
+    EPISODES.reduce((sum, ep) => sum + ep.progress, 0) / 16
   );
 
   return (
@@ -37,7 +23,7 @@ export default function EpisodesPage() {
       </div>
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {DEMO_EPISODES.map((ep) => (
+        {EPISODES.map((ep) => (
           <Link key={ep.number} href={`/episodes/${ep.number}`}>
             <Card
               className={`group hover:border-primary/30 transition-all hover:-translate-y-0.5 cursor-pointer h-full ${
@@ -49,20 +35,26 @@ export default function EpisodesPage() {
                   <span className="text-xs text-muted-foreground font-medium">
                     {ep.number}부
                   </span>
-                  {ep.focus_character && (
+                  {ep.focusCharacter && (
                     <span className="text-[10px] px-1.5 py-0.5 rounded-full bg-primary/10 text-primary">
-                      {ep.focus_character}
+                      {ep.focusCharacter}
                     </span>
                   )}
                 </div>
 
-                <h3 className="font-medium text-sm mb-2 min-h-[20px]">
+                <h3 className="font-medium text-sm mb-1 min-h-[20px]">
                   {ep.title || (
                     <span className="text-muted-foreground/40 italic">
                       제목 없음
                     </span>
                   )}
                 </h3>
+
+                {ep.firstLine && (
+                  <p className="text-xs text-primary/70 italic mb-2">
+                    &ldquo;{ep.firstLine}&rdquo;
+                  </p>
+                )}
 
                 {ep.synopsis ? (
                   <p className="text-xs text-muted-foreground line-clamp-3 leading-relaxed mb-3">
