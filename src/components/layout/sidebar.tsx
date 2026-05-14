@@ -12,6 +12,7 @@ import {
   BookOpen,
   StickyNote,
   Search,
+  Lightbulb,
   Menu,
   X,
 } from "lucide-react";
@@ -23,6 +24,7 @@ const navItems = [
   { href: "/people", label: "인물", icon: Users },
   { href: "/episodes", label: "회차", icon: Film },
   { href: "/fragments", label: "파편", icon: Sparkles },
+  { href: "/brainstorm", label: "브레인스토밍", icon: Lightbulb },
   { href: "/refs", label: "레퍼런스", icon: BookOpen },
   { href: "/scratch", label: "메모", icon: StickyNote },
 ];

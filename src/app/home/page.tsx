@@ -62,6 +62,9 @@ export default function HomePage() {
                 <span className="text-[9px] tracking-[0.3em] text-amber-500/50 uppercase">
                   a novel &middot; screenplay
                 </span>
+                <span className="text-[8px] tracking-[0.15em] text-amber-500/30 mt-4">
+                  홍시표
+                </span>
               </div>
               {/* Spine shadow */}
               <div className="absolute left-0 top-0 bottom-0 w-3 bg-gradient-to-r from-black/40 to-transparent" />
