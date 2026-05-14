@@ -3,8 +3,7 @@ import { Noto_Sans_KR, Noto_Serif_KR } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { TooltipProvider } from "@/components/ui/tooltip";
-import { Sidebar } from "@/components/layout/sidebar";
-import { CaptureButton } from "@/components/capture/capture-button";
+import { AppShell } from "@/components/layout/app-shell";
 
 const sans = Noto_Sans_KR({
   subsets: ["latin"],
@@ -32,13 +31,7 @@ export default function RootLayout({
     <html lang="ko" className={cn("dark font-sans", sans.variable, serif.variable)}>
       <body className="antialiased min-h-screen bg-background">
         <TooltipProvider>
-          <div className="flex min-h-screen">
-            <Sidebar />
-            <main className="flex-1 min-h-screen overflow-y-auto">
-              {children}
-            </main>
-          </div>
-          <CaptureButton />
+          <AppShell>{children}</AppShell>
         </TooltipProvider>
       </body>
     </html>
