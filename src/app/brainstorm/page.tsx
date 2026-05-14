@@ -14,7 +14,7 @@ import {
 } from "lucide-react";
 import { useState, useCallback, useEffect } from "react";
 import { CHARACTERS, EPISODES, FRAGMENTS } from "@/lib/data";
-import { createClient } from "@/lib/supabase/client";
+import { saveBrainstorm, getBrainstormHistory } from "@/lib/supabase/actions";
 
 // ============================================================
 // 브레인스토밍 질문 뱅크 — 작품 맥락에 맞는 질문들
@@ -137,13 +137,8 @@ export default function BrainstormPage() {
   // Load history from Supabase
   useEffect(() => {
     async function loadHistory() {
-      const supabase = createClient();
-      const { data } = await supabase
-        .from("brainstorm_history" as never)
-        .select("*")
-        .order("created_at", { ascending: false })
-        .limit(50) as { data: { id: string; question: string; answer: string; created_at: string }[] | null };
-      if (data) {
+      const data = await getBrainstormHistory();
+      if (data.length > 0) {
         setHistory(data.map((d) => ({
           id: d.id,
           q: d.question,
@@ -165,24 +160,9 @@ export default function BrainstormPage() {
   const saveAndNext = async () => {
     if (currentQuestion && answer.trim()) {
       setSaving(true);
-      const supabase = createClient();
-      const { data: { user } } = await supabase.auth.getUser();
-
-      if (user) {
-        const { data } = await supabase
-          .from("brainstorm_history" as never)
-          .insert({
-            question: currentQuestion,
-            answer: answer.trim(),
-            category,
-            user_id: user.id,
-          } as never)
-          .select()
-          .single() as { data: { id: string; question: string; answer: string; created_at: string } | null };
-
-        if (data) {
-          setHistory([{ id: data.id, q: data.question, a: data.answer, created_at: data.created_at }, ...history]);
-        }
+      const data = await saveBrainstorm(currentQuestion, answer.trim(), category);
+      if (data) {
+        setHistory([{ id: data.id, q: data.question, a: data.answer, created_at: data.created_at }, ...history]);
       }
       setSaving(false);
     }

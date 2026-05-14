@@ -1,5 +1,8 @@
 import { createClient } from "@/lib/supabase/client";
 
+// 고정 user_id — 비공개 사이트, 본인만 사용
+const USER_ID = "b18e8cbe-a644-4ef5-b7f0-b2969cbbe8ba";
+
 export interface ActivityLogRow {
   id: string;
   action: string;
@@ -10,14 +13,6 @@ export interface ActivityLogRow {
   created_at: string;
 }
 
-async function getUser() {
-  const supabase = createClient();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user;
-}
-
 // --------------- Activity Log ---------------
 
 export async function logActivity(
@@ -26,12 +21,9 @@ export async function logActivity(
   section: string,
   relatedId?: string
 ) {
-  const user = await getUser();
-  if (!user) return;
-
   const supabase = createClient();
   await supabase.from("activity_log" as never).insert({
-    user_id: user.id,
+    user_id: USER_ID,
     action,
     detail,
     section,
@@ -40,9 +32,6 @@ export async function logActivity(
 }
 
 export async function getActivityLog(days: number = 30) {
-  const user = await getUser();
-  if (!user) return [] as ActivityLogRow[];
-
   const supabase = createClient();
   const since = new Date();
   since.setDate(since.getDate() - days);
@@ -50,7 +39,6 @@ export async function getActivityLog(days: number = 30) {
   const { data } = (await supabase
     .from("activity_log" as never)
     .select("*")
-    .eq("user_id" as never, user.id as never)
     .gte("created_at" as never, since.toISOString() as never)
     .order("created_at" as never, { ascending: false } as never)) as {
     data: ActivityLogRow[] | null;
@@ -90,9 +78,6 @@ export async function saveFragment(
   tags: string[],
   type: string = "text"
 ) {
-  const user = await getUser();
-  if (!user) return null;
-
   const supabase = createClient();
   const { data, error } = (await supabase
     .from("fragments" as never)
@@ -100,7 +85,7 @@ export async function saveFragment(
       content,
       tags,
       type,
-      user_id: user.id,
+      user_id: USER_ID,
     } as never)
     .select()
     .single()) as { data: { id: string } | null; error: unknown };
@@ -113,14 +98,10 @@ export async function saveFragment(
 }
 
 export async function getFragments() {
-  const user = await getUser();
-  if (!user) return [];
-
   const supabase = createClient();
   const { data } = await supabase
     .from("fragments" as never)
     .select("*")
-    .eq("user_id" as never, user.id as never)
     .order("created_at" as never, { ascending: false } as never);
 
   return (data ?? []) as Record<string, unknown>[];
@@ -129,15 +110,12 @@ export async function getFragments() {
 // --------------- Scratch ---------------
 
 export async function saveScratch(content: string) {
-  const user = await getUser();
-  if (!user) return null;
-
   const supabase = createClient();
   const { data, error } = (await supabase
     .from("scratch" as never)
     .insert({
       content,
-      user_id: user.id,
+      user_id: USER_ID,
     } as never)
     .select()
     .single()) as { data: { id: string } | null; error: unknown };
@@ -150,29 +128,54 @@ export async function saveScratch(content: string) {
 }
 
 export async function getScratchItems() {
-  const user = await getUser();
-  if (!user) return [];
-
   const supabase = createClient();
   const { data } = await supabase
     .from("scratch" as never)
     .select("*")
-    .eq("user_id" as never, user.id as never)
     .order("created_at" as never, { ascending: false } as never);
 
   return (data ?? []) as Record<string, unknown>[];
 }
 
 export async function deleteScratch(id: string) {
-  const user = await getUser();
-  if (!user) return;
-
   const supabase = createClient();
   await supabase
     .from("scratch" as never)
     .delete()
-    .eq("id" as never, id as never)
-    .eq("user_id" as never, user.id as never);
+    .eq("id" as never, id as never);
 
   await logActivity("delete", "메모 삭제", "scratch", id);
+}
+
+// --------------- Brainstorm ---------------
+
+export async function saveBrainstorm(question: string, answer: string, category: string) {
+  const supabase = createClient();
+  const { data, error } = (await supabase
+    .from("brainstorm_history" as never)
+    .insert({
+      question,
+      answer,
+      category,
+      user_id: USER_ID,
+    } as never)
+    .select()
+    .single()) as { data: { id: string; question: string; answer: string; created_at: string } | null; error: unknown };
+
+  if (!error && data) {
+    await logActivity("brainstorm", answer.slice(0, 80), "brainstorm", data.id);
+  }
+
+  return data;
+}
+
+export async function getBrainstormHistory() {
+  const supabase = createClient();
+  const { data } = (await supabase
+    .from("brainstorm_history" as never)
+    .select("*")
+    .order("created_at" as never, { ascending: false } as never)
+    .limit(50)) as { data: { id: string; question: string; answer: string; created_at: string }[] | null };
+
+  return data ?? [];
 }
