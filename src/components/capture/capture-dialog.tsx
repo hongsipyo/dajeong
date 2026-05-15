@@ -10,8 +10,9 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Mic, MicOff, ImageIcon, Send, Tag } from "lucide-react";
+import { Mic, MicOff, ImageIcon, Send, Tag, Check } from "lucide-react";
 import { useState, useRef, useCallback } from "react";
+import { saveFragment, saveScratch } from "@/lib/supabase/actions";
 
 interface CaptureDialogProps {
   open: boolean;
@@ -29,6 +30,8 @@ export function CaptureDialog({ open, onOpenChange }: CaptureDialogProps) {
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState("");
   const [section, setSection] = useState("fragments");
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
   const [recording, setRecording] = useState(false);
   const [recordingTime, setRecordingTime] = useState(0);
   const mediaRecorderRef = useRef<MediaRecorder | null>(null);
@@ -79,13 +82,28 @@ export function CaptureDialog({ open, onOpenChange }: CaptureDialogProps) {
     if (timerRef.current) clearInterval(timerRef.current);
   };
 
-  const handleSubmit = () => {
+  const handleSubmit = async () => {
     if (!content.trim() && !recording) return;
-    // TODO: save to Supabase
-    console.log("Capture:", { content, tags, section });
-    setContent("");
-    setTags([]);
-    onOpenChange(false);
+    setSaving(true);
+    try {
+      if (section === "fragments") {
+        await saveFragment(content, tags);
+      } else {
+        // "scratch" and "world" (fallback) both save to scratch
+        await saveScratch(content);
+      }
+      setSaved(true);
+      setTimeout(() => {
+        setSaved(false);
+        setContent("");
+        setTags([]);
+        onOpenChange(false);
+      }, 800);
+    } catch (err) {
+      console.error("Save failed:", err);
+    } finally {
+      setSaving(false);
+    }
   };
 
   const formatTime = (s: number) =>
@@ -206,9 +224,18 @@ export function CaptureDialog({ open, onOpenChange }: CaptureDialogProps) {
               />
             </div>
 
-            <Button size="sm" onClick={handleSubmit} className="gap-1.5">
-              <Send className="w-3.5 h-3.5" />
-              저장
+            <Button size="sm" onClick={handleSubmit} disabled={saving || saved} className="gap-1.5">
+              {saved ? (
+                <>
+                  <Check className="w-3.5 h-3.5" />
+                  저장됨!
+                </>
+              ) : (
+                <>
+                  <Send className="w-3.5 h-3.5" />
+                  {saving ? "저장 중..." : "저장"}
+                </>
+              )}
             </Button>
           </div>
         </div>

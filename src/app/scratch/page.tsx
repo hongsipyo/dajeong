@@ -4,7 +4,12 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { StickyNote, Plus, MoveRight, Trash2, Clock } from "lucide-react";
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import {
+  saveScratch,
+  getScratchItems,
+  deleteScratch,
+} from "@/lib/supabase/actions";
 
 interface ScratchItem {
   id: string;
@@ -40,24 +45,40 @@ function timeAgo(dateStr: string) {
 }
 
 export default function ScratchPage() {
-  const [items, setItems] = useState(DEMO_SCRATCH);
+  const [items, setItems] = useState<ScratchItem[]>(DEMO_SCRATCH);
   const [newContent, setNewContent] = useState("");
 
-  const addItem = () => {
+  useEffect(() => {
+    getScratchItems().then((rows) => {
+      const typed = rows as unknown as {
+        id: string;
+        content: string;
+        created_at: string;
+        moved_to: string | null;
+      }[];
+      if (typed.length > 0) {
+        setItems(typed);
+      }
+      // If DB is empty, keep DEMO_SCRATCH as fallback
+    });
+  }, []);
+
+  const addItem = async () => {
     if (!newContent.trim()) return;
-    setItems([
-      {
-        id: String(Date.now()),
-        content: newContent.trim(),
-        created_at: new Date().toISOString(),
-      },
-      ...items,
-    ]);
+    const content = newContent.trim();
     setNewContent("");
+    const result = await saveScratch(content);
+    if (result) {
+      setItems((prev) => [
+        { id: result.id, content, created_at: new Date().toISOString() },
+        ...prev,
+      ]);
+    }
   };
 
-  const removeItem = (id: string) => {
-    setItems(items.filter((item) => item.id !== id));
+  const removeItem = async (id: string) => {
+    setItems((prev) => prev.filter((item) => item.id !== id));
+    await deleteScratch(id);
   };
 
   return (
