@@ -542,8 +542,9 @@ const CATEGORY_LABELS: Record<string, string> = {
 export { CATEGORY_LABELS as CHARACTER_Q_CATEGORIES };
 
 // 공통 질문 (모든 캐릭터에 적용)
+// Pixar, BBC Writers Room, Save the Cat, The Anatomy of Story 등에서 영감
 const COMMON_QUESTIONS: Omit<CharacterQuestion, "id">[] = [
-  // 내면
+  // 내면 (Want vs Need — Pixar/John Truby)
   { category: "inner", question: "지금 가장 무서운 것은?" },
   { category: "inner", question: "스스로에게 가장 자주 하는 거짓말은?" },
   { category: "inner", question: "아무도 모르는 자기 자신에 대한 생각은?" },
@@ -552,6 +553,17 @@ const COMMON_QUESTIONS: Omit<CharacterQuestion, "id">[] = [
   { category: "inner", question: "어떤 순간에 가장 외로워?" },
   { category: "inner", question: "'성공'이란 단어를 들으면 제일 먼저 떠오르는 건?" },
   { category: "inner", question: "울고 싶은데 못 우는 순간이 있어?" },
+  // Pixar: Want vs Need
+  { category: "inner", question: "[Pixar] 이 사람이 원하는 것(WANT)은? 그리고 정말 필요한 것(NEED)은? 둘이 어떻게 달라?" },
+  { category: "inner", question: "[Pixar] 이야기 시작할 때 이 사람이 믿고 있는 거짓말(LIE)은?" },
+  { category: "inner", question: "[Pixar] 이야기 끝에 이 사람이 받아들이는 진실(TRUTH)은?" },
+  // Save the Cat: Internal vs External Goal
+  { category: "inner", question: "[STC] 외적 목표(눈에 보이는 것)는? 내적 목표(마음속)는?" },
+  { category: "inner", question: "[STC] 이 사람의 치명적 결함(Fatal Flaw)은?" },
+  { category: "inner", question: "[STC] 이 결함 때문에 어떤 대가를 치러?" },
+  // The Anatomy of Story: Moral Argument
+  { category: "inner", question: "[Truby] 이 사람의 도덕적 논쟁은? 옳다고 믿는 것 vs 실제로 하는 것." },
+
   // 기억
   { category: "memory", question: "가장 행복했던 하루는?" },
   { category: "memory", question: "어릴 때 가장 많이 들은 말은?" },
@@ -559,28 +571,48 @@ const COMMON_QUESTIONS: Omit<CharacterQuestion, "id">[] = [
   { category: "memory", question: "처음으로 '어른'이 됐다고 느낀 순간은?" },
   { category: "memory", question: "가장 후회하는 선택은?" },
   { category: "memory", question: "어릴 때 꿈은 뭐였어?" },
-  // 관계
+  // Pixar: Ghost/Wound
+  { category: "memory", question: "[Pixar] 이 사람의 상처(WOUND)는? 과거에 어떤 일이 지금의 거짓말을 만들었어?" },
+  { category: "memory", question: "[Pixar] 이 상처를 받은 정확한 순간/장면은?" },
+  { category: "memory", question: "[BBC] 인생의 전환점 — 이전과 이후가 확연히 달라진 사건은?" },
+
+  // 관계 (John Truby: Web of Characters)
   { category: "relationship", question: "가장 가까운 사람에게도 못 하는 말이 있어?" },
   { category: "relationship", question: "누군가에게 미안한데 사과 못 한 적 있어?" },
   { category: "relationship", question: "제일 부러운 사람은 누구야? 왜?" },
   { category: "relationship", question: "이 사람 없으면 안 될 것 같은 사람은?" },
   { category: "relationship", question: "가장 실망한 사람은 누구야?" },
-  // 습관/취향
+  { category: "relationship", question: "[Truby] 이 사람의 대조 인물(Foil)은 누구야? 같은 문제에 다른 답을 가진 사람." },
+  { category: "relationship", question: "[Truby] 이 사람은 누구한테 배워? 누구를 가르쳐?" },
+  { category: "relationship", question: "[BBC] 이 사람이 방에 들어오면 분위기가 어떻게 바뀌어?" },
+
+  // 습관/취향 (구체적 디테일 — 좋은 캐릭터는 디테일에 있다)
   { category: "habit", question: "혼자 있을 때 뭐 해?" },
   { category: "habit", question: "잠들기 전에 항상 하는 것은?" },
   { category: "habit", question: "스트레스 받으면 어떻게 해?" },
   { category: "habit", question: "좋아하는 음식은? 싫어하는 음식은?" },
   { category: "habit", question: "핸드폰 열면 제일 먼저 뭐 해?" },
   { category: "habit", question: "노래방에서 부르는 노래는?" },
-  // 장면
+  { category: "habit", question: "[디테일] 걸을 때 속도는? 빨라? 느려? 주머니에 손 넣어?" },
+  { category: "habit", question: "[디테일] 밥 먹는 속도는? 뭐부터 먹어?" },
+  { category: "habit", question: "[디테일] 거짓말할 때 무의식적으로 하는 행동은?" },
+  { category: "habit", question: "[디테일] 이 사람 가방/주머니 안에 항상 있는 것은?" },
+
+  // 장면 (Pixar Storytelling Rules)
   { category: "scene", question: "이 사람이 처음 등장하는 장면을 써봐." },
   { category: "scene", question: "이 사람이 가장 빛나는 순간은?" },
   { category: "scene", question: "이 사람이 울며 쓰러지는 장면이 있다면?" },
   { category: "scene", question: "이 사람의 마지막 장면은 어떻게 끝나?" },
+  { category: "scene", question: "[Pixar #4] 옛날 옛적에 ___. 매일매일 ___. 그러던 어느 날 ___. 그래서 ___. 그래서 ___. 마침내 ___." },
+  { category: "scene", question: "[Pixar #7] 엔딩을 먼저 정해. 이 사람의 마지막 순간은? 거기서 역으로 와봐." },
+
   // 비밀
   { category: "secret", question: "아무에게도 말 안 한 비밀이 있어?" },
   { category: "secret", question: "남들이 모르는 이 사람의 재능은?" },
   { category: "secret", question: "밤에 혼자 울어본 적 있어?" },
+  { category: "secret", question: "[Pixar] 이 사람이 관객에게만 보여주고 다른 인물에겐 숨기는 것은?" },
+  { category: "secret", question: "[BBC] 이 사람이 죽기 전에 꼭 하고 싶은 한 가지는?" },
+  { category: "secret", question: "[BBC] 이 사람의 묘비에 뭐라고 써?" },
 ];
 
 // 캐릭터별 맞춤 질문
