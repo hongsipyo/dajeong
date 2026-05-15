@@ -19,6 +19,7 @@ import {
   Heart,
   Sun,
 } from "lucide-react";
+import { MoodPicker } from "./mood-picker";
 import {
   getDailyFragment,
   getDailyMission,
@@ -104,6 +105,9 @@ export default function HomePage() {
           )}
         </div>
       </section>
+
+      {/* ── Mood Picker ── */}
+      <MoodPicker />
 
       {/* ── Stats Bar ── */}
       <section className="grid grid-cols-2 md:grid-cols-4 gap-3">
