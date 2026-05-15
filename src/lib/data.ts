@@ -520,3 +520,325 @@ export function getTotalFragments(): number {
 export function getTotalCharacters(): number {
   return CHARACTERS.length;
 }
+
+// ============================================================
+// CHARACTER DEEP-DIVE QUESTIONS (인물별 질문 뱅크)
+// 각 캐릭터가 답해야 할 100가지 생각들
+// ============================================================
+export interface CharacterQuestion {
+  id: string;
+  category: "inner" | "memory" | "relationship" | "habit" | "scene" | "secret";
+  question: string;
+}
+
+const CATEGORY_LABELS: Record<string, string> = {
+  inner: "내면",
+  memory: "기억",
+  relationship: "관계",
+  habit: "습관/취향",
+  scene: "장면",
+  secret: "비밀",
+};
+export { CATEGORY_LABELS as CHARACTER_Q_CATEGORIES };
+
+// 공통 질문 (모든 캐릭터에 적용)
+const COMMON_QUESTIONS: Omit<CharacterQuestion, "id">[] = [
+  // 내면
+  { category: "inner", question: "지금 가장 무서운 것은?" },
+  { category: "inner", question: "스스로에게 가장 자주 하는 거짓말은?" },
+  { category: "inner", question: "아무도 모르는 자기 자신에 대한 생각은?" },
+  { category: "inner", question: "가장 부끄러운 욕망은?" },
+  { category: "inner", question: "10년 후 자기 모습을 상상하면?" },
+  { category: "inner", question: "어떤 순간에 가장 외로워?" },
+  { category: "inner", question: "'성공'이란 단어를 들으면 제일 먼저 떠오르는 건?" },
+  { category: "inner", question: "울고 싶은데 못 우는 순간이 있어?" },
+  // 기억
+  { category: "memory", question: "가장 행복했던 하루는?" },
+  { category: "memory", question: "어릴 때 가장 많이 들은 말은?" },
+  { category: "memory", question: "절대 잊을 수 없는 냄새는?" },
+  { category: "memory", question: "처음으로 '어른'이 됐다고 느낀 순간은?" },
+  { category: "memory", question: "가장 후회하는 선택은?" },
+  { category: "memory", question: "어릴 때 꿈은 뭐였어?" },
+  // 관계
+  { category: "relationship", question: "가장 가까운 사람에게도 못 하는 말이 있어?" },
+  { category: "relationship", question: "누군가에게 미안한데 사과 못 한 적 있어?" },
+  { category: "relationship", question: "제일 부러운 사람은 누구야? 왜?" },
+  { category: "relationship", question: "이 사람 없으면 안 될 것 같은 사람은?" },
+  { category: "relationship", question: "가장 실망한 사람은 누구야?" },
+  // 습관/취향
+  { category: "habit", question: "혼자 있을 때 뭐 해?" },
+  { category: "habit", question: "잠들기 전에 항상 하는 것은?" },
+  { category: "habit", question: "스트레스 받으면 어떻게 해?" },
+  { category: "habit", question: "좋아하는 음식은? 싫어하는 음식은?" },
+  { category: "habit", question: "핸드폰 열면 제일 먼저 뭐 해?" },
+  { category: "habit", question: "노래방에서 부르는 노래는?" },
+  // 장면
+  { category: "scene", question: "이 사람이 처음 등장하는 장면을 써봐." },
+  { category: "scene", question: "이 사람이 가장 빛나는 순간은?" },
+  { category: "scene", question: "이 사람이 울며 쓰러지는 장면이 있다면?" },
+  { category: "scene", question: "이 사람의 마지막 장면은 어떻게 끝나?" },
+  // 비밀
+  { category: "secret", question: "아무에게도 말 안 한 비밀이 있어?" },
+  { category: "secret", question: "남들이 모르는 이 사람의 재능은?" },
+  { category: "secret", question: "밤에 혼자 울어본 적 있어?" },
+];
+
+// 캐릭터별 맞춤 질문
+const CHARACTER_SPECIFIC_QUESTIONS: Record<string, Omit<CharacterQuestion, "id">[]> = {
+  dajeong: [
+    { category: "inner", question: "ADHD라는 걸 처음 알았을 때 뭘 느꼈어?" },
+    { category: "inner", question: "'올바른 하루'를 살아본 적 있어? 그날 기분이 어땠어?" },
+    { category: "inner", question: "픽사에서 일하는 자기를 상상하면 뭘 하고 있어?" },
+    { category: "inner", question: "다정이라는 이름이 싫은 적 있어?" },
+    { category: "memory", question: "할머니와 마지막으로 한 대화는?" },
+    { category: "memory", question: "편의점에서 가장 기억나는 손님은?" },
+    { category: "memory", question: "공부방에서 가장 기억나는 학생은?" },
+    { category: "relationship", question: "정우를 처음 봤을 때 첫인상은?" },
+    { category: "relationship", question: "엄마한테 가장 하고 싶은 말은?" },
+    { category: "relationship", question: "서현을 동경했다가 식은 그 순간 정확히 뭘 봤어?" },
+    { category: "scene", question: "정우가 이력서 제본해줬을 때 — 그 순간을 써봐." },
+    { category: "scene", question: "지하철 역 지나치는 그 순간, 머릿속 7개 채널을 써봐." },
+    { category: "scene", question: "집에서 화장 안 지우고 잠드는 밤 — 그 2분을 써봐." },
+  ],
+  jungwoo: [
+    { category: "inner", question: "카페블라썸이 망하면 뭐 할 거야?" },
+    { category: "inner", question: "밥그릇을 볼 때 진짜 뭐가 보여?" },
+    { category: "inner", question: "유리창에 머리 박을 때 뭘 느껴?" },
+    { category: "memory", question: "청소업 시작한 첫날은 어땠어?" },
+    { category: "memory", question: "형(수박형)과 가장 좋았던 기억은?" },
+    { category: "relationship", question: "다정이한테 이력서 제본해줄 때 무슨 생각이었어?" },
+    { category: "relationship", question: "서현이랑 쎈수학으로 싸울 때 진짜 화난 건 뭐야?" },
+    { category: "scene", question: "형이 죽었다는 소식을 들은 그 순간을 써봐." },
+    { category: "scene", question: "카페 처음 오픈한 날 아침을 써봐." },
+    { category: "secret", question: "돈에 집착하는 진짜 이유는?" },
+  ],
+  seohyun: [
+    { category: "inner", question: "병원 침대에 진짜 눕는다면 뭘 생각할 거야?" },
+    { category: "inner", question: "민사고 갔으면 지금 뭐 하고 있을까?" },
+    { category: "inner", question: "아빠가 '전국 1등' 말할 때 진짜 감정은?" },
+    { category: "memory", question: "시험에서 1등 했을 때 기분은 어땠어?" },
+    { category: "memory", question: "대학 포기한 날 뭐 했어?" },
+    { category: "relationship", question: "수박형이 '이딴 거 하면서 살면 안 된다' 했을 때 뭐라고 답했어?" },
+    { category: "relationship", question: "아빠를 사랑해?" },
+    { category: "scene", question: "쎈수학 사건 — 울기 직전 1분을 써봐." },
+    { category: "secret", question: "여자한테 속 못 터놓는 진짜 이유는?" },
+  ],
+  mom: [
+    { category: "inner", question: "공부방 문 열기 전에 매일 아침 뭘 생각해?" },
+    { category: "inner", question: "다정이한테 미안한 거 있어?" },
+    { category: "inner", question: "집에 있는 애 걱정되면서 밖에서 일할 때 — 그 감정을 정확히 써봐." },
+    { category: "memory", question: "다정이 어렸을 때 가장 기억나는 장면은?" },
+    { category: "relationship", question: "남편한테 하고 싶은 말은?" },
+    { category: "scene", question: "공부방 오픈 30분 늦은 날 아침을 써봐." },
+    { category: "secret", question: "조용한 악담을 할 때 본인도 알아?" },
+  ],
+  subak: [
+    { category: "inner", question: "착하다는 말 들을 때 기분이 좋아?" },
+    { category: "inner", question: "맞고도 안 때리는 이유가 뭐야?" },
+    { category: "memory", question: "정우가 사업 시작할 때 뭘 느꼈어?" },
+    { category: "relationship", question: "서현이가 우는 거 보고 뭘 생각했어?" },
+    { category: "scene", question: "수박가게에서 혼자 있는 오후를 써봐." },
+    { category: "secret", question: "과일가게 아줌마한테 느끼는 감정은 뭐야?" },
+  ],
+  grandma: [
+    { category: "inner", question: "다정이를 왜 따라다녀?" },
+    { category: "inner", question: "사라져야 할 때가 온 걸 어떻게 알아?" },
+    { category: "scene", question: "다정이 옆에 앉아서 아무 말 안 하는 장면을 써봐." },
+    { category: "scene", question: "마지막으로 다정이 곁을 떠나는 순간을 써봐." },
+  ],
+  ajung: [
+    { category: "inner", question: "거울을 볼 때 뭘 봐?" },
+    { category: "inner", question: "폭식 후에 드는 첫 번째 생각은?" },
+    { category: "memory", question: "영어 공부 잘했을 때 — 그때 자기는 어떤 사람이었어?" },
+    { category: "relationship", question: "다정이한테 열등감 느끼는 구체적 순간은?" },
+    { category: "scene", question: "남초직장에서 처음 국밥 먹는 날을 써봐." },
+  ],
+};
+
+export function getCharacterQuestions(charId: string): CharacterQuestion[] {
+  const common = COMMON_QUESTIONS.map((q, i) => ({ ...q, id: `common-${i}` }));
+  const specific = (CHARACTER_SPECIFIC_QUESTIONS[charId] || []).map((q, i) => ({ ...q, id: `${charId}-${i}` }));
+  return [...specific, ...common];
+}
+
+// ============================================================
+// RELATIONSHIP MATRIX (인물간 관계)
+// ============================================================
+export interface RelationshipLink {
+  from: string; // character id
+  to: string;   // character id
+  label: string;
+  tension: "love" | "family" | "friend" | "conflict" | "mentor" | "loss";
+  scenePrompt: string; // 이 관계를 보여주는 장면을 쓰게 하는 프롬프트
+}
+
+export const RELATIONSHIPS: RelationshipLink[] = [
+  {
+    from: "dajeong", to: "jungwoo",
+    label: "연인 → 이별",
+    tension: "love",
+    scenePrompt: "정우가 다정이한테 처음 '넌 괜찮아'라고 말하는 장면을 써봐.",
+  },
+  {
+    from: "dajeong", to: "seohyun",
+    label: "동경 → 식음",
+    tension: "mentor",
+    scenePrompt: "다정이가 서현을 동경하는 시선에서, 그 동경이 차갑게 식는 순간으로 전환되는 장면을 써봐.",
+  },
+  {
+    from: "dajeong", to: "mom",
+    label: "딸 — 동정과 답답함",
+    tension: "family",
+    scenePrompt: "다정이가 엄마 대신 공부방 학부모 전화 받는 장면. 엄마에 대한 감정 녹여서.",
+  },
+  {
+    from: "dajeong", to: "grandma",
+    label: "손녀 — 수호신",
+    tension: "love",
+    scenePrompt: "할머니가 다정이 옆에 앉아있는 장면. 다른 사람은 빈자리로 보는.",
+  },
+  {
+    from: "dajeong", to: "dad",
+    label: "딸 — 흐릿한 미움",
+    tension: "family",
+    scenePrompt: "아빠가 TV 보고 있고 다정이가 옆을 지나가는 3초를 써봐.",
+  },
+  {
+    from: "dajeong", to: "ajung",
+    label: "자매 — 서로의 열등감",
+    tension: "family",
+    scenePrompt: "다정이가 언니 방 쓰레기통에서 빵 봉지를 발견하는 순간.",
+  },
+  {
+    from: "jungwoo", to: "subak",
+    label: "동생 — 형의 죽음",
+    tension: "loss",
+    scenePrompt: "형이 죽은 후 정우가 카페에 혼자 앉아있는 새벽을 써봐.",
+  },
+  {
+    from: "jungwoo", to: "seohyun",
+    label: "친구 — 쎈수학 싸움",
+    tension: "conflict",
+    scenePrompt: "싸움이 끝나고 둘 다 지쳐서 나란히 앉아있는 5분을 써봐.",
+  },
+  {
+    from: "seohyun", to: "subak",
+    label: "유일한 진심",
+    tension: "friend",
+    scenePrompt: "수박형이 서현에게 '이딴 거 하면서 살면 안 된다' 하고 돌아서는 뒷모습을 써봐.",
+  },
+  {
+    from: "seohyun", to: "dad",
+    label: "아들 — 아버지의 자랑",
+    tension: "family",
+    scenePrompt: "서현 아빠가 택시 손님에게 아들 자랑하는 걸 서현이 우연히 듣는 장면.",
+  },
+  {
+    from: "mom", to: "dad",
+    label: "부부 — 한량 남편",
+    tension: "family",
+    scenePrompt: "엄마가 공부방에서 지쳐 돌아왔는데 아빠가 TV 보고 있는 그 순간.",
+  },
+  {
+    from: "mom", to: "ajung",
+    label: "엄마 — 식이장애 딸 걱정",
+    tension: "family",
+    scenePrompt: "엄마가 공부방에서 일하면서 언니 걱정하는 내면을 써봐. 밖에서 일해야 하는데 집이 신경쓰이는.",
+  },
+];
+
+export function getCharacterRelationships(charId: string): RelationshipLink[] {
+  return RELATIONSHIPS.filter(r => r.from === charId || r.to === charId);
+}
+
+// ============================================================
+// SCENE PROMPTS (장면 작성 프롬프트)
+// 파편이 아니라 연결된 장면을 쓰게 하는 것
+// ============================================================
+export interface ScenePrompt {
+  id: string;
+  title: string;
+  characters: string[]; // character ids
+  episode?: number;
+  prompt: string;
+  difficulty: "easy" | "medium" | "hard";
+  written: boolean;
+}
+
+export const SCENE_PROMPTS: ScenePrompt[] = [
+  {
+    id: "sp1", title: "올바른 하루 — 아침 계획", characters: ["dajeong"],
+    episode: 1, difficulty: "easy", written: false,
+    prompt: "다정이가 아침에 일어나서 오늘 계획을 세운다. 손걸레를 개놓으려 한다. 뭘 보고 따라하려 하는지, 왜 그러는지. 3문장이면 돼.",
+  },
+  {
+    id: "sp2", title: "편의점 삼각김밥 — ADHD", characters: ["dajeong"],
+    episode: 1, difficulty: "medium", written: false,
+    prompt: "다정이 편의점(또는 공부방)에서 뭔가 정리하는데, 머릿속 7개 채널이 동시에 재생돼. 채널 3개만 구체적으로 써봐.",
+  },
+  {
+    id: "sp3", title: "카페 첫 방문", characters: ["dajeong", "jungwoo"],
+    episode: undefined, difficulty: "medium", written: false,
+    prompt: "다정이가 카페블라썸에 처음 온다. 정우를 처음 본다. 카페는 어떻게 생겼어? 정우는 뭘 하고 있어? 다정이 첫인상은?",
+  },
+  {
+    id: "sp4", title: "ㅎ 하나 카톡", characters: ["dajeong", "jungwoo"],
+    episode: undefined, difficulty: "easy", written: false,
+    prompt: "정우가 보낸 카톡 화면을 묘사해봐. ㅎ 하나. 다정이가 '두 개 붙여'라고 하기까지의 대화.",
+  },
+  {
+    id: "sp5", title: "픽사 이력서 제본", characters: ["dajeong", "jungwoo"],
+    episode: undefined, difficulty: "hard", written: false,
+    prompt: "정우가 다정이에게 제본된 이력서를 건넨다. 빈칸 투성이. '일단 있어야 채우지.' 다정이 손에 들린 이력서의 무게, 감정, 그 다음 10초.",
+  },
+  {
+    id: "sp6", title: "뮤지컬 씬", characters: ["dajeong", "jungwoo", "yeonwoo", "hanul"],
+    episode: 15, difficulty: "hard", written: false,
+    prompt: "반지하. 정우가 꾸몄다. 친구들 하인 분장. Leave the Door Open 나온다. 현실과 환상이 뒤섞이기 시작하는 그 순간부터 써봐.",
+  },
+  {
+    id: "sp7", title: "유리창 머리 박기", characters: ["jungwoo"],
+    episode: undefined, difficulty: "hard", written: false,
+    prompt: "다정이한테 차이고, 형 죽고, 사업 엉망. 정우가 카페 유리창에 머리를 박는다. 소리, 감각, 그 뒤 친구들이 유리를 치워주는 것까지.",
+  },
+  {
+    id: "sp8", title: "쎈수학 싸움", characters: ["seohyun", "jungwoo"],
+    episode: undefined, difficulty: "medium", written: false,
+    prompt: "평소 조용하던 서현이 폭발한다. '쎈수학 문제도 안 푼 새끼가 씨발.' 정우 반격. 나머지 비아냥. 수박형만 남는다.",
+  },
+  {
+    id: "sp9", title: "서현이 병원 퇴근", characters: ["seohyun"],
+    episode: 4, difficulty: "easy", written: false,
+    prompt: "서현이 병원에서 퇴근한다. 빈 침대를 지나간다. 밖은 어둡다. 뭘 느껴? 5문장.",
+  },
+  {
+    id: "sp10", title: "아버지 그만하세요", characters: ["seohyun"],
+    episode: 4, difficulty: "medium", written: false,
+    prompt: "서현 아빠가 누군가에게 또 '전국 1등' 자랑한다. 서현이 '아버지 그만하세요.' 그 전후 30초.",
+  },
+  {
+    id: "sp11", title: "편의점 어린 다정", characters: ["dajeong", "mom"],
+    episode: 16, difficulty: "hard", written: false,
+    prompt: "다정이가 편의점 앞을 지나다 어린 자신을 본다. 도와주려 한다. 엄마가 '그냥 가자' 하고 손을 잡아끈다. 이 장면 전체.",
+  },
+  {
+    id: "sp12", title: "광명 본가 귀가", characters: ["dajeong"],
+    episode: 16, difficulty: "hard", written: false,
+    prompt: "지하철 역 또 지나침. 늦게 도착. 광명 본가. 누군가 기다려준다. '늦더라도 오면 됐지.' 누구야? 왜 기다려?",
+  },
+  {
+    id: "sp13", title: "엄마의 하루", characters: ["mom"],
+    episode: 3, difficulty: "medium", written: false,
+    prompt: "엄마가 공부방 문을 연다 (30분 늦게). 학생이 기다리고 있다. 집에선 언니 걱정. 둘 다 못하는 느낌. 이 하루.",
+  },
+  {
+    id: "sp14", title: "언니 국밥", characters: ["ajung"],
+    episode: undefined, difficulty: "easy", written: false,
+    prompt: "남초직장 식당. 국밥 나온다. 옆에 남자들. 빵 먹으라는 사람, 말리는 사람. 언니가 국밥 한 숟갈 뜨는 순간.",
+  },
+  {
+    id: "sp15", title: "할머니 사라짐", characters: ["dajeong", "grandma"],
+    episode: undefined, difficulty: "hard", written: false,
+    prompt: "할머니가 마지막으로 다정이 곁에 있는 순간. 다정이 어떻게 알아차려? 슬퍼? 졸업 같아?",
+  },
+];
