@@ -97,6 +97,65 @@ export async function saveFragment(
   return data;
 }
 
+// --------------- Characters ---------------
+
+export interface CharacterRow {
+  id: string;
+  name: string;
+  description: string | null;
+  element: string | null;
+  animal: string | null;
+  details: Record<string, string> | null;
+  notes: string | null;
+  order_index: number;
+}
+
+export async function getCharacterOverrides(): Promise<Record<string, Partial<CharacterRow>>> {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("characters" as never)
+    .select("*");
+  const map: Record<string, Partial<CharacterRow>> = {};
+  if (data) {
+    for (const row of data as CharacterRow[]) {
+      map[row.name] = row;
+    }
+  }
+  return map;
+}
+
+export async function saveCharacterField(
+  charName: string,
+  field: string,
+  value: string | null
+) {
+  const supabase = createClient();
+
+  // Check if character exists in DB
+  const { data: existing } = await supabase
+    .from("characters" as never)
+    .select("id")
+    .eq("name" as never, charName as never)
+    .single() as { data: { id: string } | null };
+
+  if (existing) {
+    await supabase
+      .from("characters" as never)
+      .update({ [field]: value } as never)
+      .eq("id" as never, existing.id as never);
+  } else {
+    await supabase
+      .from("characters" as never)
+      .insert({
+        name: charName,
+        [field]: value,
+        user_id: USER_ID,
+      } as never);
+  }
+
+  await logActivity("character_edited", `${charName} ${field} 수정`, "people");
+}
+
 export async function getFragments() {
   const supabase = createClient();
   const { data } = await supabase

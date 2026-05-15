@@ -16,7 +16,8 @@ import {
   CHARACTER_Q_CATEGORIES,
   SCENE_PROMPTS,
 } from "@/lib/data";
-import { saveBrainstorm, getBrainstormHistory } from "@/lib/supabase/actions";
+import { saveBrainstorm, getBrainstormHistory, saveCharacterField } from "@/lib/supabase/actions";
+import { Input } from "@/components/ui/input";
 
 // Tension color mapping
 const TENSION_COLORS: Record<string, string> = {
@@ -56,6 +57,28 @@ export default function CharacterDetailPage() {
 
   const [notes, setNotes] = useState(char?.notes ?? "");
   const [editing, setEditing] = useState(false);
+
+  // Editable character fields
+  const [element, setElement] = useState(char?.element ?? "");
+  const [animal, setAnimal] = useState(char?.animal ?? "");
+  const [description, setDescription] = useState(char?.description ?? "");
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [savingProfile, setSavingProfile] = useState(false);
+
+  const handleSaveProfile = async () => {
+    if (!char) return;
+    setSavingProfile(true);
+    try {
+      await saveCharacterField(char.name, "element", element || null);
+      await saveCharacterField(char.name, "animal", animal || null);
+      await saveCharacterField(char.name, "description", description || null);
+      await saveCharacterField(char.name, "notes", notes || null);
+      setEditingProfile(false);
+    } catch (err) {
+      console.error(err);
+    }
+    setSavingProfile(false);
+  };
 
   // Brainstorm history
   const [answeredMap, setAnsweredMap] = useState<Record<string, string>>({});
@@ -199,32 +222,97 @@ export default function CharacterDetailPage() {
             <h1 className="font-serif text-2xl font-bold text-gray-800">
               {char.name}
             </h1>
-            {char.element && (
-              <Badge className="bg-amber-100 text-amber-700 border-amber-200">
-                {char.element}
-              </Badge>
-            )}
-            {char.animal && (
-              <Badge className="bg-pink-100 text-pink-700 border-pink-200">
-                {char.animal}
-              </Badge>
+            {editingProfile ? (
+              <>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-gray-400">오행</span>
+                  <Input
+                    value={element}
+                    onChange={(e) => setElement(e.target.value)}
+                    placeholder="水/火/木/金/土"
+                    className="w-24 h-7 text-xs"
+                  />
+                </div>
+                <div className="flex items-center gap-1.5">
+                  <span className="text-[10px] text-gray-400">동물</span>
+                  <Input
+                    value={animal}
+                    onChange={(e) => setAnimal(e.target.value)}
+                    placeholder="물고기, 새..."
+                    className="w-28 h-7 text-xs"
+                  />
+                </div>
+              </>
+            ) : (
+              <>
+                {element && (
+                  <Badge className="bg-amber-100 text-amber-700 border-amber-200 cursor-pointer" onClick={() => setEditingProfile(true)}>
+                    {element}
+                  </Badge>
+                )}
+                {animal && (
+                  <Badge className="bg-pink-100 text-pink-700 border-pink-200 cursor-pointer" onClick={() => setEditingProfile(true)}>
+                    {animal}
+                  </Badge>
+                )}
+                {!element && !animal && (
+                  <button onClick={() => setEditingProfile(true)} className="text-[10px] text-rose-300 hover:text-rose-500 border border-dashed border-rose-200 rounded-full px-2 py-0.5">
+                    + 오행/동물 설정
+                  </button>
+                )}
+              </>
             )}
           </div>
-          <p className="text-gray-500 mb-3">{char.description}</p>
-          <div className="inline-flex items-center gap-2 bg-rose-50 border border-rose-200 rounded-full px-3 py-1 text-sm">
-            <BookOpen className="w-3.5 h-3.5 text-rose-400" />
-            <span className="text-rose-600 font-medium">
-              {answeredCount}/{totalQuestions} 답변 완료
-            </span>
-            {!loadingHistory && (
-              <div className="w-16 h-1.5 bg-rose-100 rounded-full overflow-hidden">
-                <div
-                  className="h-full bg-rose-400 rounded-full transition-all"
-                  style={{
-                    width: `${totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0}%`,
-                  }}
-                />
-              </div>
+          {editingProfile ? (
+            <Textarea
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+              placeholder="인물 설명..."
+              className="text-sm mb-3 min-h-[60px]"
+            />
+          ) : (
+            <p className="text-gray-500 mb-3 cursor-pointer hover:text-gray-700" onClick={() => setEditingProfile(true)}>
+              {description || "설명을 추가하세요..."}
+            </p>
+          )}
+          <div className="flex items-center gap-2 flex-wrap">
+            {editingProfile && (
+              <Button
+                size="sm"
+                onClick={handleSaveProfile}
+                disabled={savingProfile}
+                className="gap-1.5"
+              >
+                <Save className="w-3.5 h-3.5" />
+                {savingProfile ? "저장 중..." : "프로필 저장"}
+              </Button>
+            )}
+            {editingProfile && (
+              <Button variant="outline" size="sm" onClick={() => setEditingProfile(false)}>
+                취소
+              </Button>
+            )}
+            <div className="inline-flex items-center gap-2 bg-rose-50 border border-rose-200 rounded-full px-3 py-1 text-sm">
+              <BookOpen className="w-3.5 h-3.5 text-rose-400" />
+              <span className="text-rose-600 font-medium">
+                {answeredCount}/{totalQuestions} 답변 완료
+              </span>
+              {!loadingHistory && (
+                <div className="w-16 h-1.5 bg-rose-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-rose-400 rounded-full transition-all"
+                    style={{
+                      width: `${totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0}%`,
+                    }}
+                  />
+                </div>
+              )}
+            </div>
+            {!editingProfile && (
+              <button onClick={() => setEditingProfile(true)} className="text-[10px] text-rose-300 hover:text-rose-500">
+                <Edit2 className="w-3 h-3 inline mr-0.5" />
+                편집
+              </button>
             )}
           </div>
         </div>
