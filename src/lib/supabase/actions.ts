@@ -185,3 +185,76 @@ export async function getBrainstormHistory() {
 
   return data ?? [];
 }
+
+// --------------- Written Scenes ---------------
+
+export interface WrittenScene {
+  id: string;
+  title: string;
+  content: string;
+  characters: string[];
+  episode_number: number | null;
+  scene_order: number;
+  prompt_id: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export async function saveScene(scene: {
+  title: string;
+  content: string;
+  characters?: string[];
+  episode_number?: number | null;
+  prompt_id?: string | null;
+}) {
+  const supabase = createClient();
+  const result = await supabase
+    .from("written_scenes" as never)
+    .insert({
+      ...scene,
+      characters: scene.characters ?? [],
+      user_id: USER_ID,
+    } as never)
+    .select()
+    .single();
+
+  if (result.error) throw new Error(result.error.message);
+  const data = result.data as WrittenScene | null;
+  if (data) {
+    await logActivity("scene_created", scene.title, "scenes", data.id);
+  }
+  return data;
+}
+
+export async function updateScene(id: string, updates: {
+  title?: string;
+  content?: string;
+  characters?: string[];
+  episode_number?: number | null;
+  scene_order?: number;
+}) {
+  const supabase = createClient();
+  await supabase
+    .from("written_scenes" as never)
+    .update(updates as never)
+    .eq("id" as never, id as never);
+}
+
+export async function getScenes() {
+  const supabase = createClient();
+  const { data } = await supabase
+    .from("written_scenes" as never)
+    .select("*")
+    .order("episode_number" as never, { ascending: true } as never)
+    .order("scene_order" as never, { ascending: true } as never);
+  return (data ?? []) as WrittenScene[];
+}
+
+export async function deleteScene(id: string) {
+  const supabase = createClient();
+  await supabase
+    .from("written_scenes" as never)
+    .delete()
+    .eq("id" as never, id as never);
+  await logActivity("scene_deleted", "장면 삭제", "scenes", id);
+}

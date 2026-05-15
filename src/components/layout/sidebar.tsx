@@ -25,6 +25,7 @@ const navItems = [
   { href: "/world", label: "세계관", icon: Globe, emoji: "" },
   { href: "/people", label: "인물", icon: Users, emoji: "" },
   { href: "/episodes", label: "회차", icon: Film, emoji: "" },
+  { href: "/scenes", label: "장면 작업실", icon: Pen, emoji: "" },
   { href: "/fragments", label: "파편", icon: Sparkles, emoji: "" },
   { href: "/brainstorm", label: "브레인스토밍", icon: Lightbulb, emoji: "" },
   { href: "/progress", label: "프로그레스", icon: TrendingUp, emoji: "" },
